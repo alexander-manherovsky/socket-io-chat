@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Blog</title>
+    <title>Socket.io - Chat</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i&amp;subset=cyrillic" rel="stylesheet">
@@ -55,7 +55,11 @@
     <div class="wrapper">
         <header class="header">
             <div class="container">
-                Chat
+                <div class="header-wrp">
+                    Chat
+                    <span class="greetings"></span>
+                </div>
+                
             </div>
         </header>
 
@@ -89,11 +93,14 @@
                         <button class="btn">Send</button>
                     </div>
                 </div>
+                <div class="disconnected-message"></div>
+                <div class="someone-typed-message"></div>
             </div>
         </footer>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script src="js/main.js"></script>
 </body>
 

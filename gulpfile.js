@@ -3,7 +3,6 @@ const sass = require('gulp-sass');
 const del = require('del');
 const browserSync = require('browser-sync').create();
 const reload = browserSync.reload;
-const nodemon = require('gulp-nodemon');
 
 
 const src = {
@@ -21,31 +20,18 @@ gulp.task('sass', () => {
 
     return gulp.src('sass/main.scss')
         .pipe(sass().on('error', sass.logError))
-        .pipe(gulp.dest(src.css))
-        // .pipe(reload({ stream: true }));
+        .pipe(gulp.dest(src.css));
 });
 
-gulp.task('nodemon', cb => {
-    let callbackCalled = false;
-    return nodemon({ script: './server.js' })
-        .on('start', () => {
-            if (!callbackCalled) {
-                callbackCalled = true;
-                cb();
-            }
-        });
-});
-
-gulp.task('watch', gulp.series('nodemon', () => {
+gulp.task('watch',  () => {
 
     browserSync.init(null, {
-        proxy: "http://localhost:5000", // port of node server
-        files: ["public/**/*.*"],
+        server: {
+            baseDir: "./public",
+        }
     });
 
-    gulp.watch(src.sass, gulp.series('clean', 'sass')).on('change', reload);
-    gulp.watch(src.html).on('change', reload);
-    gulp.watch(src.js).on('change', reload);
-}));
+    gulp.watch(src.sass, gulp.series('clean', 'sass'));
+});
 
 gulp.task('default', gulp.series('clean', 'sass', 'watch'));

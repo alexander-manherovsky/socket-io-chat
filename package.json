@@ -6,7 +6,7 @@
     "url": "git://github.com/Aleksander-Mangierowski/socket-io-chat.git"
   },
   "description": "socket-io-chat - BSA_18",
-  "main": "gulpfile.js",
+  "main": "gulpile.js",
   "scripts": {
     "test": "npm test",
     "start": "node ./server.js"
@@ -27,5 +27,6 @@
     "path": "^0.12.7"
   },
   "dependencies": {
+    "socket.io": "^2.1.1"
   }
 }

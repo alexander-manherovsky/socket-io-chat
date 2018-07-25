@@ -2,6 +2,12 @@
 
 const user = {};
 
+
+// socket.io
+
+const socket = io.connect();
+
+
 // auth modal handler
 
 ;(() => {
@@ -29,36 +35,76 @@ const user = {};
 
         document.body.classList.remove('overflow-hidden');
 
-        const options = {
-            method: 'POST',
-            headers: {
-                "Content-type": "application/json"
-            },
-            body: JSON.stringify(user)
-        };
+        document.querySelector('.header span.greetings').innerHTML = `Hello, ${user.name} (@${user.nick})!`
 
-        fetch('/api/users', options)
-            .then(response => response.json())
-            .then(data => {
-
-                user._id = data._id;
-            });
-
-        getData();
-
-        setInterval(() => {
-            getData();
-        }, 1000);
-
+        socket.emit('new user', user);
+   
     });
 
 })();
 
 
+socket.on('users list', publicUsers);
+
+socket.on('new user', publicUser);
+
+socket.on('my user id', userId => {
+    user.id = userId;
+});
+
+socket.on('change user status', changeUserStatus);
+
+socket.on('someone is typing', name => {
+
+    document.querySelector('.someone-typed-message').innerHTML = `User @${name} is typing now...`;
+
+    setTimeout(() => {
+        document.querySelector('.someone-typed-message').innerHTML = '';
+    }, 3000);
+});
+
+
+const usersList = document.getElementById('users-list');
+
+function publicUser(user) {
+
+    const li = document.createElement('li');
+    li.classList.add(user.status);
+    li.dataset.userId = user.id;
+
+    li.innerHTML = `
+            <span class="name">${user.name}</span>
+            <span class="nick">@${user.nick}</span>
+        `;
+
+    usersList.appendChild(li);
+}
+
+function publicUsers(users) {
+
+    users.forEach(user => {
+        publicUser(user);        
+    });
+}
+
+const disconnectedMessagePlace = document.querySelector('.disconnected-message');
+
+function changeUserStatus(user) {
+
+    usersList.querySelector(`li[data-user-id="${user.id}"]`).className = user.status;
+
+    if (user.status == 'left') {
+        
+        disconnectedMessagePlace.innerHTML = `User @${user.nick} left chat at this moment `;
+        setTimeout(() => {
+            disconnectedMessagePlace.innerHTML = '';
+        }, 1000 * 60);
+    }
+}
+
 // message input handler
 
-;
-(() => {
+;(() => {
 
     const messageInputBlock = document.querySelector('.message-wrp');
     const sendBtn = messageInputBlock.querySelector('button');
@@ -76,112 +122,67 @@ const user = {};
         const body = input.value;
 
         const message = {
-            _user: user._id,
+            user: user.id,
             body,
             createdAt: Date.now()
         }
 
         input.value = '';
 
-        const options = {
-            method: 'POST',
-            headers: {
-                "Content-type": "application/json"
-            },
-            body: JSON.stringify(message)
-        };
+        socket.emit('new message', message);
 
-        fetch('/api/messages', options);
+    });
 
+    input.addEventListener('input', evt => {
+        socket.emit('i am typing', user.name);
     });
 
 })();
 
-function getData() {
-
-    const options = {
-        headers: {
-            "Content-type": "application/json"
-        }
-    }
-
-    fetch('/api/users', options)
-        .then(response => response.json())
-        .then(data => {
-
-            publicUsers(data);
-        });
-
-    fetch('/api/messages', options)
-        .then(response => response.json())
-        .then(data => {
-
-            publicPosts(data);
-        });
-}
 
 
-const usersList = document.getElementById('users-list');
+socket.on('message history', publicPosts);
 
-function publicUsers(users) {
-
-    clearNode(usersList);
-
-    users.forEach(user => {
-
-        const li = document.createElement('li');
-
-        li.innerHTML = `
-            <span class="name">${user.name}</span>
-            <span class="nick">@${user.nick}</span>
-        `;
-
-        usersList.appendChild(li);
-    });
-}
-
+socket.on('new message', publicPost);
 
 
 postsEl = document.getElementsByClassName('posts')[0];
 
 
-function publicPosts(posts) {
+function publicPost(post) {
+    console.log('public post', post);
+    
 
-    clearNode();
+    const postElWrp = document.createElement('li');
+    postElWrp.classList.add('col');
 
-    [...posts].reverse().forEach(post => {
-        
-        const postElWrp = document.createElement('li');
-        postElWrp.classList.add('col');
+    const postEl = document.createElement('div');
+    postEl.classList.add('post');
 
-        const postEl = document.createElement('div');
-        postEl.classList.add('post');
+    const bodyWords = post.body.split(' ');
+    if (bodyWords.includes('@' + user.nick)) {
+        postEl.classList.add('active');
+    }
 
-        const bodyWords = post.body.split(' ');
-        if(bodyWords.includes('@' + user.nick)) {
-            postEl.classList.add('active');
-        }
-
-        postEl.innerHTML = `
-            <div class="post-header">
-                <div class="name-wrp">
-                    <span class="name">${post._user.name}</span>
-                    <span class="nick">@${post._user.nick}</span>
-                </div>
-                <span class="time">${moment(post.createdAt).format("MMM Do YY, h:mm:ss")}</span>
+    postEl.innerHTML = `
+        <div class="post-header">
+            <div class="name-wrp">
+                <span class="name">${post.user.name}</span>
+                <span class="nick">@${post.user.nick}</span>
             </div>
-            <div class="post-body">${post.body}</div>
-        `;
+            <span class="time">${moment(post.createdAt).format("MMM Do YY, h:mm:ss")}</span>
+        </div>
+        <div class="post-body">${post.body}</div>
+    `;
 
-        postElWrp.appendChild(postEl);
-        postsEl.appendChild(postElWrp);
-
-    });
+    postElWrp.appendChild(postEl);
+    postsEl.appendChild(postElWrp);
 }
 
-function clearNode(node = postsEl, from = 0) {
+function publicPosts(posts) {
 
-    while (node.children.length > from) {
-        node.removeChild(node.lastChild);
-    }
+    posts.forEach(post => {
+        
+        publicPost(post);
+    });
 }

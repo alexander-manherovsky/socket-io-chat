@@ -119,6 +119,14 @@ span.nick {
   background-color: #2980b9;
   font-size: 4rem;
   padding: 15px 0; }
+  .header .header-wrp {
+    display: flex;
+    justify-content: space-between; }
+    .header .header-wrp .greetings {
+      font-size: 2rem;
+      font-weight: 300;
+      font-style: italic;
+      margin-top: auto; }
 
 .footer {
   color: #444;
@@ -143,28 +151,72 @@ span.nick {
     .created-by a:hover {
       text-decoration: underline; }
 
+.disconnected-message,
+.someone-typed-message {
+  font-weight: 300;
+  font-style: italic;
+  font-size: 1.2em;
+  margin-top: 10px; }
+
 @media (min-width: 768px) {
   .main-wrp {
     display: flex; } }
 
 @media (min-width: 768px) {
   aside {
-    flex: 0 0 250px;
+    flex: 0 0 300px;
     padding-right: 15px; } }
 
 aside .users {
   font-size: 1.2rem;
   margin-top: 40px; }
   aside .users li {
+    position: relative;
     background-color: #ccc;
     border-radius: 15px;
-    padding: 10px; }
+    padding: 10px 10px 10px 35px; }
+    aside .users li::before {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      border-radius: 50%; }
+    aside .users li.online::before {
+      background-color: blue; }
+    aside .users li.offline::before {
+      background-color: black; }
+    aside .users li.appeared::before {
+      background-color: green; }
+    aside .users li.left::before {
+      background-color: #444; }
+    aside .users li::after {
+      content: '';
+      position: absolute;
+      right: 15px;
+      top: -5px;
+      transform: translateY(-100%);
+      font-size: 1em; }
+    aside .users li.online::after {
+      content: 'online';
+      color: blue; }
+    aside .users li.offline::after {
+      content: 'offline';
+      color: black; }
+    aside .users li.appeared::after {
+      content: 'just appeared';
+      color: green; }
+    aside .users li.left::after {
+      content: 'just left';
+      color: #777; }
     aside .users li + li {
-      margin-top: 5px; }
+      margin-top: 35px; }
 
 @media (min-width: 768px) {
   main {
-    flex: 1 0 calc(100% - 250px); } }
+    flex: 1 0 calc(100% - 300px); } }
 
 .post {
   font-size: 1.2rem;

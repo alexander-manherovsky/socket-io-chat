@@ -1,22 +1,8 @@
 const express = require('express');
-const session = require("express-session");
-const MongoStore = require("connect-mongo")(session);
-const mongooseConnection = require("./db/dbconnect").connection;
 const path = require('path');
-const bodyParser = require('body-parser');
+
 
 const app = express();
-
-app.use(
-    session({
-        secret: "sessionsecretsessionsecret",
-        resave: true,
-        saveUninitialized: true,
-        store: new MongoStore({
-            mongooseConnection: mongooseConnection
-        })
-    })
-);
 
 const staticPath = path.normalize(__dirname + "/public");
 app.use(express.static(staticPath));
@@ -31,12 +17,88 @@ app.get('/js/main.js', function (req, res) {
     res.sendFile(__dirname + 'js/main.js');
 });
 
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-const routes = require('./routes/api/routes')(app);
-
-const sever = app.listen(5000, () => {
-    console.log('listening on *:5000');
+const http = require('http');
+const server = http.createServer(app).listen(5000, () => {
+    console.log('listening on *:5000');    
 });
+const io = require('socket.io').listen(server);
+
+const users = [];
+const messages = [];
+
+io.on('connection', socket => {
+
+    console.log('Client is connected');
+
+    socket.on('new user', user => {
+
+        user.status = 'appeared';
+        user.id = socket.id;
+       
+        users.push(user);
+
+        socket.emit('my user id', users.id);
+
+        io.emit('new user', user);
+
+        setTimeout(() => {
+            user.status = 'online';
+            io.emit('change user status', user);
+        }, 1000 * 60);
+    });
+
+
+    socket.on('new message', msg => {
+
+        messages.push(msg);
+
+        io.emit('new message', getMessageWithAuthor(msg));
+    });
+
+    socket.on('i am typing', name => {
+
+        socket.broadcast.emit('someone is typing', name);
+        // io.emit('someone is typing', name);
+    });
+
+    socket.on('disconnect', () => {
+
+        const disconnectedUser = users.filter(user => user.id == socket.id)[0];
+        
+        if(!disconnectedUser) return;
+
+        disconnectedUser.status = 'left';
+
+        io.emit('change user status', disconnectedUser);
+
+        setTimeout(() => {
+            disconnectedUser.status = 'offline';
+            io.emit('change user status', disconnectedUser);
+        }, 1000 * 60);
+    });
+
+
+    socket.emit('message history', getMessagesWithAuthors(messages));
+    socket.emit('users list', users);
+
+});
+
+
+function getMessageWithAuthor(msg) {
+
+    return Object.assign({}, msg, { user: users[msg.user] });
+}
+
+function getMessagesWithAuthors(messages) {
+    
+    if (messages.length > 100) {
+
+        messages = messages.slice(messages.length - 100);
+    }
+
+    return messages.length ? messages.map(msg => getMessageWithAuthor(msg)) : [];
+}
+
+
+
+

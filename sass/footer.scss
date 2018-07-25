@@ -27,3 +27,11 @@
         }
     }
 }
+
+.disconnected-message,
+.someone-typed-message {
+    font-weight: 300;
+    font-style: italic;
+    font-size: 1.2em;
+    margin-top: 10px;
+}
