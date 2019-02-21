@@ -20,7 +20,7 @@
     "del": "^3.0.0",
     "express": "^4.16.3",
     "express-session": "^1.15.6",
-    "gulp": "github:gulpjs/gulp#4.0",
+    "gulp": "github:gulpjs/gulp#v4.0.0",
     "gulp-nodemon": "^2.2.1",
     "gulp-sass": "^4.0.1",
     "mongoose": "^5.1.3",
