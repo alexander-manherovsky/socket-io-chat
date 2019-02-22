@@ -82,7 +82,7 @@ function publicUser(user) {
 
 function publicUsers(users) {
 
-    users.forEach(user => {
+    Object.values(users).forEach(user => {
         publicUser(user);        
     });
 }
@@ -150,8 +150,6 @@ postsEl = document.getElementsByClassName('posts')[0];
 
 
 function publicPost(post) {
-    console.log('public post', post);
-    
 
     const postElWrp = document.createElement('li');
     postElWrp.classList.add('col');
