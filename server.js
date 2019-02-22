@@ -23,7 +23,7 @@ const server = http.createServer(app).listen(5000, () => {
 });
 const io = require('socket.io').listen(server);
 
-const users = [];
+const users = {};
 const messages = [];
 
 io.on('connection', socket => {
@@ -35,9 +35,9 @@ io.on('connection', socket => {
         user.status = 'appeared';
         user.id = socket.id;
        
-        users.push(user);
+        users[user.id] = user;
 
-        socket.emit('my user id', users.id);
+        socket.emit('my user id', user.id);
 
         io.emit('new user', user);
 
@@ -63,7 +63,7 @@ io.on('connection', socket => {
 
     socket.on('disconnect', () => {
 
-        const disconnectedUser = users.filter(user => user.id == socket.id)[0];
+        const disconnectedUser = Object.values(users).filter(user => user.id == socket.id)[0];
         
         if(!disconnectedUser) return;
 
