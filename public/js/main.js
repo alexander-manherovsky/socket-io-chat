@@ -1,17 +1,11 @@
 // application user 
-
 const user = {};
 
-
 // socket.io
-
 const socket = io.connect();
 
-
 // auth modal handler
-
 ;(() => {
-
     const authModal = document.querySelector('.modal.auth');
     const okBtn = authModal.querySelector('button');
 
@@ -43,7 +37,6 @@ const socket = io.connect();
 
 })();
 
-
 socket.on('users list', publicUsers);
 
 socket.on('new user', publicUser);
@@ -55,7 +48,6 @@ socket.on('my user id', userId => {
 socket.on('change user status', changeUserStatus);
 
 socket.on('someone is typing', name => {
-
     document.querySelector('.someone-typed-message').innerHTML = `User @${name} is typing now...`;
 
     setTimeout(() => {
@@ -63,11 +55,9 @@ socket.on('someone is typing', name => {
     }, 3000);
 });
 
-
 const usersList = document.getElementById('users-list');
 
 function publicUser(user) {
-
     const li = document.createElement('li');
     li.classList.add(user.status);
     li.dataset.userId = user.id;
@@ -81,7 +71,6 @@ function publicUser(user) {
 }
 
 function publicUsers(users) {
-
     Object.values(users).forEach(user => {
         publicUser(user);        
     });
@@ -90,11 +79,9 @@ function publicUsers(users) {
 const disconnectedMessagePlace = document.querySelector('.disconnected-message');
 
 function changeUserStatus(user) {
-
     usersList.querySelector(`li[data-user-id="${user.id}"]`).className = user.status;
 
     if (user.status == 'left') {
-        
         disconnectedMessagePlace.innerHTML = `User @${user.nick} left chat at this moment `;
         setTimeout(() => {
             disconnectedMessagePlace.innerHTML = '';
@@ -103,15 +90,12 @@ function changeUserStatus(user) {
 }
 
 // message input handler
-
 ;(() => {
-
     const messageInputBlock = document.querySelector('.message-wrp');
     const sendBtn = messageInputBlock.querySelector('button');
     const input = messageInputBlock.querySelector('input');
 
     sendBtn.addEventListener('click', evt => {
-
         if (input.value === '') {
             messageInputBlock.classList.add('invalid');
             return;
@@ -139,18 +123,13 @@ function changeUserStatus(user) {
 
 })();
 
-
-
 socket.on('message history', publicPosts);
 
 socket.on('new message', publicPost);
 
-
 postsEl = document.getElementsByClassName('posts')[0];
 
-
 function publicPost(post) {
-
     const postElWrp = document.createElement('li');
     postElWrp.classList.add('col');
 
@@ -178,9 +157,7 @@ function publicPost(post) {
 }
 
 function publicPosts(posts) {
-
-    posts.forEach(post => {
-        
+    posts.forEach(post => {       
         publicPost(post);
     });
 }

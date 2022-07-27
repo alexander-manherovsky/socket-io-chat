@@ -27,11 +27,9 @@ const users = {};
 const messages = [];
 
 io.on('connection', socket => {
-
     console.log('Client is connected');
 
     socket.on('new user', user => {
-
         user.status = 'appeared';
         user.id = socket.id;
        
@@ -49,20 +47,16 @@ io.on('connection', socket => {
 
 
     socket.on('new message', msg => {
-
         messages.push(msg);
 
         io.emit('new message', getMessageWithAuthor(msg));
     });
 
     socket.on('i am typing', name => {
-
         socket.broadcast.emit('someone is typing', name);
-        // io.emit('someone is typing', name);
     });
 
     socket.on('disconnect', () => {
-
         const disconnectedUser = Object.values(users).filter(user => user.id == socket.id)[0];
         
         if(!disconnectedUser) return;
@@ -85,14 +79,11 @@ io.on('connection', socket => {
 
 
 function getMessageWithAuthor(msg) {
-
     return Object.assign({}, msg, { user: users[msg.user] });
 }
 
 function getMessagesWithAuthors(messages) {
-    
     if (messages.length > 100) {
-
         messages = messages.slice(messages.length - 100);
     }
 
